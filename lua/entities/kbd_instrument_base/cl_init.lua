@@ -3,7 +3,7 @@ include("shared.lua")
 ENT.DEBUG = false
 ENT.VELOCITY_MAX = 127
 ENT.NOTE_FADEOUT_TIME = 0.2
-ENT.NOTE_PLAY_TIME_MAX = 2.4
+ENT.NOTE_PLAY_TIME_MAX = 1.87
 
 ENT.KeysDown = {}
 ENT.KeysWasDown = {}
