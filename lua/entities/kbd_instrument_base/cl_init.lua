@@ -514,7 +514,7 @@ net.Receive("KeyboardInstrumentNetwork", function(length, client)
                 // Gather note
                 local semitone = net.ReadUInt(8)
                 local velocity = net.ReadUInt(8)
-                ent:PlayNote(semitone, velocity * ent.VELOCITY_MAX * 80 / 100)
+                ent:PlayNote(semitone, velocity)
             end
         end
     end
