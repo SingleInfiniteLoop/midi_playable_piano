@@ -97,7 +97,7 @@ function piano_midi.load()
                (note > 35) and (note <= (35 + instrument.SemitonesNum)) then
                 piano_midi.sendNote(instrument, note - 35, velocity)
             end
-        end )
+        end)
 
         -- Tell others it worked
         hook.Run("piano_midi_init", midi)
