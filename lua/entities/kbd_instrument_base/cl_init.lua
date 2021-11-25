@@ -78,7 +78,7 @@ function ENT:InitSounds()
 end
 
 function ENT:GetSound(semitone)
-    if !self.Sounds[semitone] then
+    if not self.Sounds[semitone] then
         self.Sounds[semitone] = CreateSound(self, self:GetSoundPath(self.SoundNames[semitone]))
         self.IsSoundRequested[semitone] = false
         self.IsSoundPlaying[semitone] = false
@@ -111,7 +111,7 @@ function ENT:StopNoteSound(semitone)
             self.IsSoundPlaying[semitone] = false
             sound:ChangeVolume(0, self.NOTE_FADEOUT_TIME)
             timer.Simple(self.NOTE_FADEOUT_TIME, function()
-                if !self.IsSoundRequested[semitone] then
+                if not self.IsSoundRequested[semitone] then
                     sound:Stop()
                 end
                 sound = nil
@@ -155,15 +155,15 @@ function ENT:InitKeys()
 end
 
 function ENT:IsKeyTriggered(key)
-    return self.KeysDown[key] && !self.KeysWasDown[key]
+    return self.KeysDown[key] and not self.KeysWasDown[key]
 end
 
 function ENT:IsKeyHeld(key)
-    return self.KeysDown[key] && self.KeysWasDown[key]
+    return self.KeysDown[key] and self.KeysWasDown[key]
 end
 
 function ENT:IsKeyReleased(key)
-    return self.KeysWasDown[key] && !self.KeysDown[key]
+    return self.KeysWasDown[key] and not self.KeysDown[key]
 end
 
 function ENT:ProcessNoteKey(key, keyData, shift, pressed)
@@ -184,9 +184,9 @@ function ENT:ProcessNoteKey(key, keyData, shift, pressed)
 end
 
 function ENT:ProcessKeys()
-    if self.DelayKey && self.DelayKey > CurTime() then return end
+    if self.DelayKey and (self.DelayKey > CurTime()) then return end
     local shiftMode = self.ShiftMode
-    local shiftModeSwitched = shiftMode != self.ShiftModeOld
+    local shiftModeSwitched = shiftMode ~= self.ShiftModeOld
 
     // Update last pressed
     for key, keyData in pairs(self.KeysDown) do
@@ -202,11 +202,11 @@ function ENT:ProcessKeys()
         end
         if shiftModeSwitched then
             if self:IsKeyHeld(key) then
-                self:ProcessNoteKey(key, keyData, !shiftMode, false)
+                self:ProcessNoteKey(key, keyData, not shiftMode, false)
                 self:ProcessNoteKey(key, keyData, shiftMode, true)
             end
             if self:IsKeyReleased(key) then
-                self:ProcessNoteKey(key, keyData, !shiftMode, false)
+                self:ProcessNoteKey(key, keyData, not shiftMode, false)
             end
         else
             if self:IsKeyReleased(key) then
@@ -214,7 +214,7 @@ function ENT:ProcessKeys()
             end
         end
     end
-    if shiftModeSwitched && (shiftMode == self.ShiftMode) then
+    if shiftModeSwitched and (shiftMode == self.ShiftMode) then
         self.ShiftModeOld = shiftMode
     end
     // Get control keys
@@ -431,7 +431,7 @@ function ENT:SheetMusicBack()
 end
 
 function ENT:ToggleAdvancedMode()
-    self.AdvancedMode = !self.AdvancedMode
+    self.AdvancedMode = not self.AdvancedMode
     if ValidPanel(self.Browser) then
         self:CloseSheetMusic()
         self:OpenSheetMusic()
@@ -440,7 +440,7 @@ end
 
 function ENT:ToggleShiftMode()
     self.ShiftModeOld = self.ShiftMode
-    self.ShiftMode = !self.ShiftMode
+    self.ShiftMode = not self.ShiftMode
 end
 
 function ENT:Initialize()
@@ -450,7 +450,7 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-    if IsValid(LocalPlayer().Instrument) && LocalPlayer().Instrument == self then
+    if IsValid(LocalPlayer().Instrument) and (LocalPlayer().Instrument == self) then
         self:ProcessKeys()
     end
 end
@@ -510,7 +510,7 @@ net.Receive("KeyboardInstrumentNetwork", function(length, client)
     elseif cmd == INSTNET_HEAR then
         if IsValid(ent) then
             // Don't play for the owner, they've already heard it!
-            if !IsValid(LocalPlayer().Instrument) || LocalPlayer().Instrument != ent then
+            if not IsValid(LocalPlayer().Instrument) or (LocalPlayer().Instrument ~= ent) then
                 // Gather note
                 local semitone = net.ReadUInt(8)
                 local velocity = net.ReadUInt(8)

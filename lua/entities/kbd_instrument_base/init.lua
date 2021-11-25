@@ -68,8 +68,8 @@ end
 
 local function HookChair(ply, ent)
     local inst = ent:GetOwner()
-    if IsValid(inst) && inst.Base == "kbd_instrument_base" then
-        if !IsValid(inst.Owner) then
+    if IsValid(inst) and (inst.Base == "kbd_instrument_base") then
+        if not IsValid(inst.Owner) then
             inst:AddOwner(ply)
             return true
         else
@@ -87,13 +87,13 @@ hook.Add("CanPlayerEnterVehicle", "InstrumentChairHook", HookChair)
 hook.Add("PlayerUse", "InstrumentChairModelHook", HookChair)
 
 function ENT:Use(ply)
-    if !IsValid(self.Owner) then
+    if not IsValid(self.Owner) then
         self:AddOwner(ply)
     end
 end
 
 function ENT:AddOwner(ply)
-    if !IsValid(self.Owner) then
+    if not IsValid(self.Owner) then
         net.Start("KeyboardInstrumentNetwork")
             net.WriteEntity(self)
             net.WriteInt(INSTNET_USE, 4)
