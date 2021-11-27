@@ -1,4 +1,13 @@
 piano_midi = {}
+piano_midi.releaseHold = false
+piano_midi.pressedHold = false
+piano_midi.releaseHoldOld = false
+piano_midi.pressedHoldOld = false
+piano_midi.noteOn = {}
+piano_midi.noteHold = {}
+piano_midi.MIDI_CC_HOLD = 64
+piano_midi.MIDI_CC_SOSTENUTO = 66
+piano_midi.MIDI_CC_VALUE_ON = 64
 
 include("midi_interface/console.lua")
 
@@ -64,9 +73,47 @@ function piano_midi.eventHook(time, command, note, velocity, ...)
     -- Get instrument entity
     local instrument = LocalPlayer().Instrument
     if midi and IsValid(instrument) then
-        if (name == "NOTE_ON" or name == "NOTE_OFF") and
+        if (name == "NOTE_ON") and
            (note > 35) and (note <= (35 + instrument.SemitonesNum)) then
+            if not piano_midi.pressedHold then
+                piano_midi.noteOn[note] = true
+            end
             piano_midi.sendNote(instrument, note - 35, velocity)
+        elseif (name == "NOTE_OFF") and
+               (note > 35) and (note <= (35 + instrument.SemitonesNum)) then
+            if not piano_midi.pressedHold then
+                table.remove(piano_midi.noteOn, note)
+            end
+            if piano_midi.releaseHold then
+                piano_midi.noteHold[note] = true
+            else
+                if not piano_midi.pressedHold or
+                   (piano_midi.pressedHold and not piano_midi.noteOn[note]) then
+                    piano_midi.sendNote(instrument, note - 35, 0)
+                end
+            end
+        elseif (name == "CONTINUOUS_CONTROLLER") then
+            if (note == piano_midi.MIDI_CC_HOLD) then
+                piano_midi.releaseHoldOld = piano_midi.releaseHold
+                piano_midi.releaseHold = velocity >= piano_midi.MIDI_CC_VALUE_ON
+                if not piano_midi.releaseHold and piano_midi.releaseHoldOld and
+                   not table.IsEmpty(piano_midi.noteHold) then
+                    for noteIndex, hold in pairs(piano_midi.noteHold) do
+                        piano_midi.sendNote(instrument, noteIndex - 35, 0)
+                    end
+                    piano_midi.noteHold = {}
+                end
+            elseif (note == piano_midi.MIDI_CC_SOSTENUTO) then
+                piano_midi.pressedHoldOld = piano_midi.pressedHold
+                piano_midi.pressedHold = velocity >= piano_midi.MIDI_CC_VALUE_ON
+                if not piano_midi.pressedHold and piano_midi.pressedHoldOld and
+                   not table.IsEmpty(piano_midi.noteOn) then
+                    for noteIndex, active in pairs(piano_midi.noteOn) do
+                        piano_midi.sendNote(instrument, noteIndex - 35, 0)
+                    end
+                    piano_midi.noteOn = {}
+                end
+            end
         end
     end
 end
@@ -74,6 +121,7 @@ end
 function piano_midi.load()
     -- If file exists (windows, macosx or linux)
     if file.Exists("lua/bin/gmcl_midi_osx.dll", "MOD") or
+       file.Exists("lua/bin/gmcl_midi_osx64.dll", "MOD") or
        file.Exists("lua/bin/gmcl_midi_win32.dll", "MOD") or
        file.Exists("lua/bin/gmcl_midi_win64.dll", "MOD") or
        file.Exists("lua/bin/gmcl_midi_linux.dll", "MOD") or
@@ -82,6 +130,12 @@ function piano_midi.load()
         require("midi") -- Import the library
         if midi then -- Check it succeeded
             piano_midi.printChat("GMCL MIDI module initialised. Use console commands midi_devices and midi_debug [0|1] to use.")
+            piano_midi.releaseHold = false
+            piano_midi.pressedHold = false
+            piano_midi.releaseHoldOld = false
+            piano_midi.pressedHoldOld = false
+            piano_midi.noteOn = {}
+            piano_midi.noteHold = {}
             hook.Add("MIDI", "midiPlayablePiano", piano_midi.eventHook)
             -- Tell others it worked
             hook.Run("piano_midi_init", midi)
