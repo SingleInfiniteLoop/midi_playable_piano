@@ -195,7 +195,8 @@ function ENT:ProcessKeys()
     // Get keys
     for key, keyData in pairs(self.Keys) do
         // Update key status
-        self.KeysDown[key] = input.IsKeyDown(key)
+        self.KeysDown[key] = input.IsKeyDown(key) and
+                             not gui.IsGameUIVisible()
         // Check for note keys
         if self:IsKeyTriggered(key) then
             self:ProcessNoteKey(key, keyData, shiftMode, true)
@@ -220,7 +221,8 @@ function ENT:ProcessKeys()
     // Get control keys
     for key, keyData in pairs(self.ControlKeys) do
         // Update key status
-        self.KeysDown[key] = input.IsKeyDown(key)
+        self.KeysDown[key] = input.IsKeyDown(key) and
+                             not gui.IsGameUIVisible()
         // Check for control keys
         if self:IsKeyTriggered(key) then
             keyData(self, true)
