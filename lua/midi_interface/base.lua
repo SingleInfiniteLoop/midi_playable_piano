@@ -8,10 +8,30 @@ piano_midi.noteHold = {}
 piano_midi.MIDI_CC_HOLD = 64
 piano_midi.MIDI_CC_SOSTENUTO = 66
 piano_midi.MIDI_CC_VALUE_ON = 64
+piano_midi.VEL_CLAMP_MIN = 32
+piano_midi.VEL_CLAMP_MAX = 127
 
 include("midi_interface/console.lua")
 
 local table = table
+
+function piano_midi.clampVelocity(velocity)
+    local velClampVar = GetConVar("midi_vel_clamp")
+    local velClamp = piano_midi.VEL_CLAMP_MAX
+    if velClampVar then
+        velClamp = velClampVar:GetInt()
+    end
+    if velClamp < piano_midi.VEL_CLAMP_MIN then
+        velClamp = piano_midi.VEL_CLAMP_MIN
+    end
+    if velClamp > piano_midi.VEL_CLAMP_MAX then
+        velClamp = piano_midi.VEL_CLAMP_MAX
+    end
+    if velocity > velClamp then
+        velocity = velClamp
+    end
+    return velocity * 127 / velClamp
+end
 
 function piano_midi.sendNote(instrument, note, velocity)
     if not instrument.RegisterNoteEvent then
@@ -20,7 +40,7 @@ function piano_midi.sendNote(instrument, note, velocity)
     if note < 1 or note > instrument.SemitonesNum then
         error("Note out of range. (1-" .. instrument.SemitonesNum .. ")")
     end
-    instrument:RegisterNoteEvent(note, velocity)
+    instrument:RegisterNoteEvent(note, piano_midi.clampVelocity(velocity))
 end
 
 -- To string everything and add tabs, as normal print would

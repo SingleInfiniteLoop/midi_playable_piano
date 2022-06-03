@@ -138,7 +138,11 @@ local function midiInit(_midi)
     end
     -- Pop up interface to let you select a midi device
     concommand.Add("midi_devices", midiDevices)
-    CreateConVar("midi_debug", "0", FCVAR_ARCHIVE, "Should MIDI events be printed to chat", 0, 1)
+    CreateConVar("midi_debug", "0", FCVAR_ARCHIVE,
+                 "Should MIDI events be printed to chat", 0, 1)
+    CreateConVar("midi_vel_clamp", "127", FCVAR_ARCHIVE,
+                 "Velocity value that corresponds to the highest sound volume",
+                 piano_midi.VEL_CLAMP_MIN, piano_midi.VEL_CLAMP_MAX)
 end
 
 concommand.Add("midi_reload", midiReload)

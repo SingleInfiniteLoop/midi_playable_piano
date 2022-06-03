@@ -11,6 +11,7 @@ See [Installation](https://github.com/FPtje/gmcl_midi#installation) section of t
 - `midi_devices` - This allows you to select the MIDI device you wish to use.
 - `midi_debug [0|1]` - This boolean ConVar enables/disables debug prints in console, which show information about midi events as they occur.
 - `midi_reload` - This simply reloads the addon, and searches for GMCL MIDI binary LUA module again, allowing users to add the file without relog.
+- `midi_vel_clamp [32..127]` - This ConVar allows to clamp the MIDI key press velocity in order to get higher volume sounds out of gentle key presses.
 - `sv_midi_sf_note_quota` - This is a server-side quota for starfall playNote calls (per second) (def 30).
 
 ## Starfall
